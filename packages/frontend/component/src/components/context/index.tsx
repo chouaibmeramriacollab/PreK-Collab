@@ -5,8 +5,7 @@ import { Provider } from 'jotai';
 import type { PropsWithChildren } from 'react';
 import { useMemo } from 'react';
 
-import { ConfirmModalProvider } from '../../ui/modal';
-
+import { ConfirmModalProvider, PromptModalProvider } from '../../ui/modal';
 export type AffineContextProps = PropsWithChildren<{
   store?: ReturnType<typeof createStore>;
 }>;
@@ -20,6 +19,7 @@ export function AffineContext(props: AffineContextProps) {
             <Provider key="JotaiProvider" store={props.store} />,
             <ThemeProvider key="ThemeProvider" />,
             <ConfirmModalProvider key="ConfirmModalProvider" />,
+            <PromptModalProvider key="PromptModalProvider" />,
           ].filter(Boolean),
         [props.store]
       )}

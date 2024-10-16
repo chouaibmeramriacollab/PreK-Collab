@@ -1,4 +1,4 @@
-import { useEditCollectionName } from '@affine/core/components/page-list';
+import { usePromptModal } from '@affine/component';
 import { createEmptyCollection } from '@affine/core/components/page-list/use-collection-manager';
 import { CollectionService } from '@affine/core/modules/collection';
 import { ExplorerService } from '@affine/core/modules/explorer';
@@ -13,6 +13,7 @@ import { useCallback } from 'react';
 import { AddItemPlaceholder } from '../../layouts/add-item-placeholder';
 import { CollapsibleSection } from '../../layouts/collapsible-section';
 import { ExplorerCollectionNode } from '../../nodes/collection';
+import * as styles from './index.css';
 
 export const ExplorerCollections = () => {
   const t = useI18n();
@@ -23,14 +24,26 @@ export const ExplorerCollections = () => {
   });
   const explorerSection = explorerService.sections.collections;
   const collections = useLiveData(collectionService.collections$);
-  const { open: openCreateCollectionModel } = useEditCollectionName({
-    title: t['com.affine.editCollection.createCollection'](),
-    showTips: true,
-  });
+  const { openPromptModal } = usePromptModal();
 
   const handleCreateCollection = useCallback(() => {
-    openCreateCollectionModel('')
-      .then(name => {
+    openPromptModal({
+      title: t['com.affine.editCollection.saveCollection'](),
+      label: t['com.affine.editCollectionName.name'](),
+      inputOptions: {
+        placeholder: t['com.affine.editCollectionName.name.placeholder'](),
+      },
+      children: (
+        <div className={styles.createTips}>
+          {t['com.affine.editCollectionName.createTips']()}
+        </div>
+      ),
+      confirmText: t['com.affine.editCollection.save'](),
+      cancelText: t['com.affine.editCollection.button.cancel'](),
+      confirmButtonOptions: {
+        variant: 'primary',
+      },
+      onConfirm(name) {
         const id = nanoid();
         collectionService.addCollection(createEmptyCollection(id, { name }));
         track.$.navigationPanel.organize.createOrganizeItem({
@@ -38,14 +51,13 @@ export const ExplorerCollections = () => {
         });
         workbenchService.workbench.openCollection(id);
         explorerSection.setCollapsed(false);
-      })
-      .catch(err => {
-        console.error(err);
-      });
+      },
+    });
   }, [
     collectionService,
     explorerSection,
-    openCreateCollectionModel,
+    openPromptModal,
+    t,
     workbenchService.workbench,
   ]);
 

@@ -218,3 +218,9 @@ export const promptModalContent = style({
   flexDirection: 'column',
   gap: '12px',
 });
+
+export const label = style({
+  color: cssVar('textSecondaryColor'),
+  fontSize: 14,
+  lineHeight: '22px',
+});
