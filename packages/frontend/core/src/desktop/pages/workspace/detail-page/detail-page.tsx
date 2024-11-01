@@ -1,4 +1,4 @@
-import { notify, Scrollable, useHasScrollTop } from '@affine/component';
+import { notify, Scrollable } from '@affine/component';
 import { PageDetailSkeleton } from '@affine/component/page-detail-skeleton';
 import type { ChatPanel } from '@affine/core/blocksuite/presets/ai';
 import { AIProvider } from '@affine/core/blocksuite/presets/ai';
@@ -33,7 +33,7 @@ import {
   WorkspaceService,
 } from '@toeverything/infra';
 import clsx from 'clsx';
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AffineErrorBoundary } from '../../../../components/affine/affine-error-boundary';
@@ -242,12 +242,38 @@ const DetailPageImpl = memo(function DetailPageImpl() {
     [editor, openPage, docCollection.id, jumpToPageBlock, t]
   );
 
-  const [refCallback, hasScrollTop] = useHasScrollTop();
+  const [hasScrollTop, setHasScrollTop] = useState(false);
 
   const openOutlinePanel = useCallback(() => {
     workbench.openSidebar();
     view.activeSidebarTab('outline');
   }, [workbench, view]);
+
+  const scrollViewportRef = useRef<HTMLDivElement | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const scrollTop = e.currentTarget.scrollTop;
+
+      const hasScrollTop = scrollTop > 0;
+      setHasScrollTop(hasScrollTop);
+      view.setScrollPosition(scrollTop);
+    },
+    [view]
+  );
+
+  useEffect(() => {
+    if (mode === 'page') {
+      setTimeout(() => {
+        scrollViewportRef?.current?.scrollTo(
+          0,
+          view.scrollPositions.get(view.history.location) || 0
+        );
+        setScrolled(true);
+      }, 50);
+    }
+  }, [mode, scrolled, view]);
 
   return (
     <FrameworkScope scope={editor.scope}>
@@ -265,7 +291,8 @@ const DetailPageImpl = memo(function DetailPageImpl() {
             <TopTip pageId={doc.id} workspace={workspace} />
             <Scrollable.Root>
               <Scrollable.Viewport
-                ref={refCallback}
+                onScroll={handleScroll}
+                ref={scrollViewportRef}
                 className={clsx(
                   'affine-page-viewport',
                   styles.affineDocViewport,
