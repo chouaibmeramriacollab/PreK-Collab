@@ -65,13 +65,10 @@ async function findPackageJson(root) {
 }
 
 async function main() {
-  if (process.argv.length < 3) {
-    console.error('Usage: node script.js <commit-hash>');
-    process.exit(1);
-  }
-
-  const commitHash = process.argv[2];
+  const commitHash = process.argv[2] || process.env.GITHUB_BASE_REF;
   const currentHead = process.argv[3] || 'HEAD';
+  if (!commitHash) process.exit(1);
+
   const changedPackages = new Set();
   const folders = await findPackageJson(
     join(fileURLToPath(import.meta.url), '..', '..')
