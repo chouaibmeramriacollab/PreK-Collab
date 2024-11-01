@@ -67,7 +67,10 @@ async function findPackageJson(root) {
 async function main() {
   const commitHash = process.argv[2] || process.env.GITHUB_BASE_REF;
   const currentHead = process.argv[3] || 'HEAD';
-  if (!commitHash) process.exit(1);
+  if (!commitHash) {
+    console.error('Missing base ref commit hash, skipping check.');
+    process.exit(1);
+  }
 
   const changedPackages = new Set();
   const folders = await findPackageJson(
