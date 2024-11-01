@@ -72,9 +72,7 @@ export function JournalPageHeader({ page, workspace }: PageHeaderProps) {
           page={page}
         />
       </div>
-      {hideToday ? null : (
-        <JournalTodayButton docCollection={workspace.docCollection} />
-      )}
+      {hideToday ? null : <JournalTodayButton />}
       <HeaderDivider />
       <PageHeaderMenuButton
         isJournal
